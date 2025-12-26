@@ -1,2 +1,1 @@
-# AndroidNavigationController
-Workshop registration Android app using Jetpack Compose with input validation and navigation.
+This project is an Android application built with Jetpack Compose. It showcases basic UI design, state handling, input validation, and navigation between screens. The app enables users to register for a workshop by entering the workshop title, workshop ID, and number of sessions in text fields. A checkbox is included for users to confirm the registration details they have entered.
