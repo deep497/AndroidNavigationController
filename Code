@@ -1,0 +1,164 @@
+package com.example.ca2
+
+import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+
+@Suppress("ClassName")
+class Ca_2 : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            WorkshopApp()
+        }
+    }
+}
+
+@Composable
+fun WorkshopApp() {
+    val navController = rememberNavController()
+
+    NavHost(navController = navController, startDestination = "registration") {
+        composable("registration") {
+            RegistrationScreen(navController)
+        }
+        composable(
+            route = "confirmation/{title}/{id}/{sessions}",
+            arguments = listOf(
+                navArgument("title") { type = NavType.StringType },
+                navArgument("id") { type = NavType.StringType },
+                navArgument("sessions") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val title = backStackEntry.arguments?.getString("title") ?: ""
+            val id = backStackEntry.arguments?.getString("id") ?: ""
+            val sessions = backStackEntry.arguments?.getString("sessions") ?: ""
+            ConfirmationScreen(title, id, sessions)
+        }
+    }
+}
+
+@Composable
+fun RegistrationScreen(navController: NavController) {
+    var title by remember { mutableStateOf("") }
+    var workshopId by remember { mutableStateOf("") }
+    var sessions by remember { mutableStateOf("") }
+    var isConfirmed by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        OutlinedTextField(
+            value = title,
+            onValueChange = { title = it },
+            label = { Text("Workshop Title") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = workshopId,
+            onValueChange = { workshopId = it },
+            label = { Text("Workshop ID") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = sessions,
+            onValueChange = { sessions = it },
+            label = { Text("Number of Sessions") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = isConfirmed,
+                onCheckedChange = { isConfirmed = it }
+            )
+            Text(text = "Confirm Registration")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                val sessionCount = sessions.toIntOrNull() ?: 0
+                if (sessionCount > 0 && isConfirmed) {
+                    navController.navigate("confirmation/$title/$workshopId/$sessions")
+                } else {
+                    Toast.makeText(
+                        context,
+                        "Please enter valid details and confirm the registration.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Register")
+        }
+    }
+}
+
+@Composable
+fun ConfirmationScreen(title: String, id: String, sessions: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(text = "Registration Successful", fontSize = 24.sp)
+        Spacer(modifier = Modifier.height(20.dp))
+        Text(text = "Title: $title", fontSize = 18.sp)
+        Text(text = "ID: $id", fontSize = 18.sp)
+        Text(text = "Sessions: $sessions", fontSize = 18.sp)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewRegistrationScreen() {
+    MaterialTheme {
+        RegistrationScreen(navController = rememberNavController())
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewConfirmationScreen() {
+    MaterialTheme {
+        ConfirmationScreen(
+            title = "Android Workshop",
+            id = "WS-101",
+            sessions = "5"
+        )
+    }
+}
